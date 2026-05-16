@@ -143,7 +143,7 @@ export function UniformPaymentApp() {
     <div className="min-h-screen pb-12">
       <header className="border-b border-[var(--border)] bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--surface-2)]/90 backdrop-blur">
         <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
-          <h1 className="bg-gradient-to-r from-[var(--secondary)] to-[var(--accent)] bg-clip-text text-xl font-bold text-transparent">
+          <h1 className="bg-gradient-to-r from-[var(--secondary)] via-[var(--accent)] to-[var(--accent)] bg-clip-text text-xl font-bold text-transparent">
             Mfumo wa Malipo ya Sare
           </h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
@@ -165,7 +165,7 @@ export function UniformPaymentApp() {
                     current
                       ? "bg-[var(--accent-soft)] text-[var(--accent)] ring-1 ring-[var(--accent)]/50"
                       : done
-                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                        ? "bg-[var(--secondary-soft)] text-[var(--secondary)]"
                         : "bg-[var(--surface)] text-[var(--muted)]"
                   }`}
                 >
@@ -174,7 +174,7 @@ export function UniformPaymentApp() {
                       current
                         ? "bg-[var(--accent)] text-white"
                         : done
-                          ? "bg-[var(--accent)] text-white"
+                          ? "bg-[var(--secondary)] text-white"
                           : "bg-[var(--surface-2)]"
                     }`}
                   >
@@ -340,7 +340,7 @@ function SelectUniformStep({
                 <h3 className="font-semibold text-[var(--text)]">{item.name}</h3>
                 <p className="text-xs text-[var(--muted)]">{item.description}</p>
               </div>
-              <span className="font-bold text-[var(--accent)]">
+              <span className="font-bold text-[var(--secondary)]">
                 {formatTzs(item.price)}
               </span>
             </div>
@@ -488,7 +488,7 @@ function InvoiceStep({
             <td colSpan={3} className="pt-4 text-right font-bold text-[var(--text)]">
               Jumla
             </td>
-            <td className="pt-4 text-right text-lg font-bold text-[var(--accent)]">
+            <td className="pt-4 text-right text-lg font-bold text-[var(--secondary)]">
               {formatTzs(total)}
             </td>
           </tr>
@@ -538,7 +538,7 @@ function PaymentStep({
       <h2 id="step4-h" className="text-lg font-semibold text-[var(--text)]">
         Hatua 4: Fanya malipo
       </h2>
-      <p className="mt-2 text-2xl font-bold text-[var(--accent)]">
+      <p className="mt-2 text-2xl font-bold text-[var(--secondary)]">
         {formatTzs(total)}
       </p>
       <p className="mt-1 text-sm text-[var(--muted)]">
@@ -626,7 +626,7 @@ function ReceiptStep({
         <p className="text-center text-xs uppercase tracking-widest text-[var(--muted)]">
           Risiti rasmi (mfano)
         </p>
-        <p className="mt-2 text-center text-lg font-bold text-[var(--accent)]">
+        <p className="mt-2 text-center text-lg font-bold text-[var(--secondary)]">
           {receipt.receiptNo}
         </p>
         <p className="mt-1 text-center text-xs text-[var(--muted)]">{dateStr}</p>
@@ -657,7 +657,7 @@ function ReceiptStep({
         <hr className="my-4 border-[var(--border)]" />
         <p className="flex justify-between text-base font-bold">
           <span>JUMLA</span>
-          <span className="text-[var(--accent)]">{formatTzs(receipt.total)}</span>
+          <span className="text-[var(--secondary)]">{formatTzs(receipt.total)}</span>
         </p>
         <p className="mt-2 text-xs text-[var(--muted)]">
           Malipo: {methodLabel}
@@ -669,7 +669,7 @@ function ReceiptStep({
       <button
         type="button"
         onClick={onNew}
-        className="mt-6 w-full rounded-xl border border-[var(--accent)] bg-[var(--accent-soft)] py-3 text-sm font-bold text-[var(--accent)]"
+        className="mt-6 w-full rounded-xl border border-[var(--accent)] bg-[var(--accent-soft)] py-3 text-sm font-bold text-[var(--accent)] hover:bg-[var(--accent)]/10"
       >
         Malipo mapya (mwanafunzi mwingine)
       </button>
