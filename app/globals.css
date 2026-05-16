@@ -3,31 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0a0f1a;
-  --page-bg: #0c1220;
-  --surface: #131b2e;
-  --surface-2: #1a2540;
-  --border: #2a3f66;
-  --text: #f0f6ff;
-  --muted: #8ba3c7;
-  --accent: #38bdf8;
-  --accent-soft: rgba(56, 189, 248, 0.2);
-  --secondary: #f97316;
-  --secondary-soft: rgba(249, 115, 22, 0.2);
-  --ok: #fb923c;
+  --bg: #140d14;
+  --page-bg: #1a1018;
+  --surface: #241a28;
+  --surface-2: #2e2030;
+  --border: #5c3a52;
+  --text: #fdf2f8;
+  --muted: #c4a0b8;
+  --accent: #ec4899;
+  --accent-soft: rgba(236, 72, 153, 0.22);
+  --secondary: #f472b6;
+  --secondary-soft: rgba(244, 114, 182, 0.22);
+  --ok: #f9a8d4;
 }
 
 body {
   color: var(--text);
   background: radial-gradient(
-      ellipse 70% 50% at 0% 0%,
-      rgba(249, 115, 22, 0.18),
-      transparent 50%
+      ellipse 90% 60% at 50% -20%,
+      rgba(236, 72, 153, 0.28),
+      transparent 55%
     ),
     radial-gradient(
-      ellipse 80% 60% at 100% 30%,
-      rgba(56, 189, 248, 0.25),
-      transparent 55%
+      ellipse 70% 50% at 100% 80%,
+      rgba(244, 114, 182, 0.18),
+      transparent 50%
     ),
     var(--page-bg);
   min-height: 100vh;

@@ -143,7 +143,7 @@ export function UniformPaymentApp() {
     <div className="min-h-screen pb-12">
       <header className="border-b border-[var(--border)] bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--surface-2)]/90 backdrop-blur">
         <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
-          <h1 className="bg-gradient-to-r from-[var(--secondary)] via-[var(--accent)] to-[var(--accent)] bg-clip-text text-xl font-bold text-transparent">
+          <h1 className="bg-gradient-to-r from-[var(--secondary)] to-[var(--accent)] bg-clip-text text-xl font-bold text-transparent">
             Mfumo wa Malipo ya Sare
           </h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
