@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0c12;
+  --page-bg: #0f1219;
+  --surface: #161b26;
+  --surface-2: #1e2536;
+  --border: #2d3a52;
+  --text: #f0f4fc;
+  --muted: #94a3b8;
+  --accent: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.15);
+  --ok: #34d399;
+}
+
+body {
+  color: var(--text);
+  background: radial-gradient(
+      ellipse 90% 60% at 50% -20%,
+      rgba(99, 102, 241, 0.18),
+      transparent 55%
+    ),
+    var(--page-bg);
+  min-height: 100vh;
+}
