@@ -14,10 +14,10 @@ import { formatTzs } from "@/lib/money";
 
 const STEPS: { id: StepId; label: string }[] = [
   { id: "student-id", label: "Student ID" },
-  { id: "select-uniform", label: "Chagua sare" },
-  { id: "invoice", label: "Ankara" },
-  { id: "payment", label: "Malipo" },
-  { id: "receipt", label: "Risiti" },
+  { id: "select-uniform", label: "Select uniform" },
+  { id: "invoice", label: "Invoice" },
+  { id: "payment", label: "Payment" },
+  { id: "receipt", label: "Receipt" },
 ];
 
 function receiptNo(): string {
@@ -73,7 +73,7 @@ export function UniformPaymentApp() {
   const handleVerifyStudent = () => {
     const found = findStudent(studentIdInput);
     if (!found) {
-      setIdError("Student ID haipatikani. Jaribu STU001, STU002, STU003 au STU004.");
+      setIdError("Student ID not found. Try STU001, STU002, STU003, or STU004.");
       setStudent(null);
       return;
     }
@@ -144,16 +144,16 @@ export function UniformPaymentApp() {
       <header className="border-b border-[var(--border)] bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--surface-2)]/90 backdrop-blur">
         <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
           <h1 className="bg-gradient-to-r from-[var(--secondary)] to-[var(--accent)] bg-clip-text text-xl font-bold text-transparent">
-            Mfumo wa Malipo ya Sare
+            School Uniform Payment System
           </h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Uniform Payment System — Student ID hadi risiti
+            From Student ID to receipt
           </p>
         </div>
       </header>
 
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        <nav aria-label="Hatua za malipo" className="mb-8">
+        <nav aria-label="Payment steps" className="mb-8">
           <ol className="flex flex-wrap gap-2">
             {STEPS.map((s, i) => {
               const done = i < stepIndex;
@@ -258,11 +258,11 @@ function StudentIdStep({
   return (
     <section aria-labelledby="step1-h">
       <h2 id="step1-h" className="text-lg font-semibold text-[var(--text)]">
-        Hatua 1: Student ID
+        Step 1: Student ID
       </h2>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Ingiza namba ya mwanafunzi ili kuthibitisha taarifa na kuendelea na
-        chaguo la sare.
+        Enter the student number to verify their details and continue to uniform
+        selection.
       </p>
       <label className="mt-6 block">
         <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
@@ -272,7 +272,7 @@ function StudentIdStep({
           value={value}
           onChange={(e) => onChange(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === "Enter" && onSubmit()}
-          placeholder="Mfano: STU001"
+          placeholder="e.g. STU001"
           className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 font-mono text-lg tracking-wide text-[var(--text)] outline-none focus:border-[var(--accent)]"
           autoFocus
         />
@@ -283,7 +283,7 @@ function StudentIdStep({
         </p>
       ) : null}
       <p className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">
-        <strong className="text-[var(--text)]">Mfano wa ID:</strong>{" "}
+        <strong className="text-[var(--text)]">Sample IDs:</strong>{" "}
         {DEMO_STUDENTS.map((s) => s.id).join(", ")}
       </p>
       <button
@@ -291,7 +291,7 @@ function StudentIdStep({
         onClick={onSubmit}
         className="mt-6 w-full rounded-xl bg-[var(--accent)] py-3 text-sm font-bold text-white hover:brightness-110 sm:w-auto sm:px-10"
       >
-        Thibitisha na endelea
+        Verify and continue
       </button>
     </section>
   );
@@ -323,7 +323,7 @@ function SelectUniformStep({
   return (
     <section aria-labelledby="step2-h">
       <h2 id="step2-h" className="text-lg font-semibold text-[var(--text)]">
-        Hatua 2: Chagua sare
+        Step 2: Select uniform
       </h2>
       <p className="mt-2 text-sm text-[var(--muted)]">
         <span className="font-medium text-[var(--text)]">{student.fullName}</span>{" "}
@@ -345,7 +345,7 @@ function SelectUniformStep({
               </span>
             </div>
             <p className="mt-3 text-xs font-semibold uppercase text-[var(--muted)]">
-              Chagua ukubwa
+              Select size
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {item.sizes.map((size) => {
@@ -399,7 +399,7 @@ function SelectUniformStep({
         ))}
       </ul>
       <p className="mt-6 text-right text-sm">
-        Jumla ya muda huu:{" "}
+        Running total:{" "}
         <span className="text-lg font-bold text-[var(--text)]">
           {formatTzs(total)}
         </span>
@@ -410,7 +410,7 @@ function SelectUniformStep({
           onClick={onBack}
           className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--muted)]"
         >
-          Rudi
+          Back
         </button>
         <button
           type="button"
@@ -418,7 +418,7 @@ function SelectUniformStep({
           disabled={!canNext}
           className="rounded-xl bg-[var(--accent)] px-8 py-2.5 text-sm font-bold text-white hover:brightness-110 disabled:opacity-40"
         >
-          Endelea kwenye ankara
+          Continue to invoice
         </button>
       </div>
     </section>
@@ -446,11 +446,11 @@ function InvoiceStep({
   return (
     <section aria-labelledby="step3-h">
       <h2 id="step3-h" className="text-lg font-semibold text-[var(--text)]">
-        Hatua 3: Muhtasari wa ankara (Invoice)
+        Step 3: Invoice summary
       </h2>
       <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm">
         <p>
-          <span className="text-[var(--muted)]">Mwanafunzi:</span>{" "}
+          <span className="text-[var(--muted)]">Student:</span>{" "}
           <span className="font-semibold text-[var(--text)]">
             {student.fullName}
           </span>
@@ -459,16 +459,16 @@ function InvoiceStep({
           <span className="text-[var(--muted)]">Student ID:</span> {student.id}
         </p>
         <p className="mt-1">
-          <span className="text-[var(--muted)]">Darasa:</span> {student.className}
+          <span className="text-[var(--muted)]">Class:</span> {student.className}
         </p>
       </div>
       <table className="mt-6 w-full text-sm">
         <thead>
           <tr className="border-b border-[var(--border)] text-left text-xs uppercase text-[var(--muted)]">
-            <th className="pb-2 pr-2">Sare</th>
-            <th className="pb-2 pr-2">Ukubwa</th>
-            <th className="pb-2 pr-2 text-center">Idadi</th>
-            <th className="pb-2 text-right">Kiasi</th>
+            <th className="pb-2 pr-2">Uniform</th>
+            <th className="pb-2 pr-2">Size</th>
+            <th className="pb-2 pr-2 text-center">Qty</th>
+            <th className="pb-2 text-right">Amount</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[var(--border)]">
@@ -486,7 +486,7 @@ function InvoiceStep({
         <tfoot>
           <tr>
             <td colSpan={3} className="pt-4 text-right font-bold text-[var(--text)]">
-              Jumla
+              Total
             </td>
             <td className="pt-4 text-right text-lg font-bold text-[var(--secondary)]">
               {formatTzs(total)}
@@ -500,14 +500,14 @@ function InvoiceStep({
           onClick={onBack}
           className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--muted)]"
         >
-          Rudi
+          Back
         </button>
         <button
           type="button"
           onClick={onNext}
           className="rounded-xl bg-[var(--accent)] px-8 py-2.5 text-sm font-bold text-white hover:brightness-110"
         >
-          Endelea kwa malipo
+          Continue to payment
         </button>
       </div>
     </section>
@@ -528,21 +528,21 @@ function PaymentStep({
   onPay: () => void;
 }) {
   const methods: { id: PaymentMethod; label: string; hint: string }[] = [
-    { id: "mobile", label: "Simu (M-Pesa / mix)", hint: "Lipa kwa namba ya shule" },
-    { id: "bank", label: "Benki / uhamisho", hint: "Nambari ya akaunti ya shule" },
-    { id: "cash", label: "Fedha taslimu", hint: "Ofisi ya shule / duka la sare" },
+    { id: "mobile", label: "Mobile (M-Pesa / mix)", hint: "Pay via school mobile number" },
+    { id: "bank", label: "Bank transfer", hint: "School bank account number" },
+    { id: "cash", label: "Cash", hint: "School office / uniform shop" },
   ];
 
   return (
     <section aria-labelledby="step4-h">
       <h2 id="step4-h" className="text-lg font-semibold text-[var(--text)]">
-        Hatua 4: Fanya malipo
+        Step 4: Make payment
       </h2>
       <p className="mt-2 text-2xl font-bold text-[var(--secondary)]">
         {formatTzs(total)}
       </p>
       <p className="mt-1 text-sm text-[var(--muted)]">
-        Chagua njia ya malipo (mfano wa mfumo — hakuna malipo halisi mtandaoni).
+        Choose a payment method (demo system — no real online payment).
       </p>
       <ul className="mt-6 space-y-2">
         {methods.map((m) => (
@@ -579,14 +579,14 @@ function PaymentStep({
           onClick={onBack}
           className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--muted)]"
         >
-          Rudi
+          Back
         </button>
         <button
           type="button"
           onClick={onPay}
           className="rounded-xl bg-[var(--accent)] px-8 py-2.5 text-sm font-bold text-white hover:brightness-110"
         >
-          Thibitisha malipo
+          Confirm payment
         </button>
       </div>
     </section>
@@ -600,17 +600,17 @@ function ReceiptStep({
   receipt: Receipt;
   onNew: () => void;
 }) {
-  const dateStr = new Date(receipt.paidAt).toLocaleString("sw-TZ", {
+  const dateStr = new Date(receipt.paidAt).toLocaleString("en-TZ", {
     dateStyle: "medium",
     timeStyle: "short",
   });
 
   const methodLabel =
     receipt.paymentMethod === "mobile"
-      ? "Simu (mobile money)"
+      ? "Mobile money"
       : receipt.paymentMethod === "bank"
-        ? "Benki"
-        : "Fedha taslimu";
+        ? "Bank"
+        : "Cash";
 
   return (
     <section aria-labelledby="step5-h">
@@ -619,12 +619,12 @@ function ReceiptStep({
           ✓
         </span>
         <h2 id="step5-h" className="text-lg font-semibold text-[var(--text)]">
-          Hatua 5: Risiti — malipo yamekamilika
+          Step 5: Receipt — payment complete
         </h2>
       </div>
       <article className="mt-6 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface-2)] p-6 font-mono text-sm">
         <p className="text-center text-xs uppercase tracking-widest text-[var(--muted)]">
-          Risiti rasmi (mfano)
+          Official receipt (sample)
         </p>
         <p className="mt-2 text-center text-lg font-bold text-[var(--secondary)]">
           {receipt.receiptNo}
@@ -636,11 +636,11 @@ function ReceiptStep({
           {receipt.student.id}
         </p>
         <p>
-          <span className="text-[var(--muted)]">Jina:</span>{" "}
+          <span className="text-[var(--muted)]">Name:</span>{" "}
           {receipt.student.fullName}
         </p>
         <p>
-          <span className="text-[var(--muted)]">Darasa:</span>{" "}
+          <span className="text-[var(--muted)]">Class:</span>{" "}
           {receipt.student.className}
         </p>
         <hr className="my-4 border-[var(--border)]" />
@@ -656,22 +656,22 @@ function ReceiptStep({
         </ul>
         <hr className="my-4 border-[var(--border)]" />
         <p className="flex justify-between text-base font-bold">
-          <span>JUMLA</span>
+          <span>TOTAL</span>
           <span className="text-[var(--secondary)]">{formatTzs(receipt.total)}</span>
         </p>
         <p className="mt-2 text-xs text-[var(--muted)]">
-          Malipo: {methodLabel}
+          Payment: {methodLabel}
         </p>
       </article>
       <p className="mt-4 text-center text-xs text-[var(--muted)]">
-        Hifadhi namba ya risiti kwa marejeleo. Asante!
+        Save your receipt number for your records. Thank you!
       </p>
       <button
         type="button"
         onClick={onNew}
         className="mt-6 w-full rounded-xl border border-[var(--accent)] bg-[var(--accent-soft)] py-3 text-sm font-bold text-[var(--accent)] hover:bg-[var(--accent)]/10"
       >
-        Malipo mapya (mwanafunzi mwingine)
+        New payment (another student)
       </button>
     </section>
   );

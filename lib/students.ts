@@ -1,29 +1,29 @@
 import type { Student } from "./types";
 
-/** Wanafunzi wa mfano — tumia ID: STU001, STU002, STU003 */
+/** Demo students — use IDs: STU001, STU002, STU003, STU004 */
 export const DEMO_STUDENTS: Student[] = [
   {
     id: "STU001",
     fullName: "Amina Hassan Juma",
-    className: "Darasa la 5",
+    className: "Grade 5",
     level: "primary",
   },
   {
     id: "STU002",
     fullName: "John Michael Mwenda",
-    className: "Kidato cha 2",
+    className: "Form 2",
     level: "secondary",
   },
   {
     id: "STU003",
     fullName: "Neema Godfrey Lyimo",
-    className: "Darasa la 7",
+    className: "Grade 7",
     level: "primary",
   },
   {
     id: "STU004",
     fullName: "Kelvin Peter Msigwa",
-    className: "Kidato cha 4",
+    className: "Form 4",
     level: "secondary",
   },
 ];

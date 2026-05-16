@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mfumo wa Malipo ya Sare | Uniform Payment",
+  title: "School Uniform Payment System",
   description:
-    "Malipo ya sare za shule: Student ID, chagua sare, ankara, malipo, na risiti.",
+    "School uniform payments: Student ID, select uniform, invoice, payment, and receipt.",
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sw">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
