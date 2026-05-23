@@ -7,17 +7,17 @@ export async function GET() {
   try {
     await dbConnect();
 
-    // Check if users already exist
-    const count = await User.countDocuments();
-    if (count > 0) {
+    // Check if admin user already exists
+    const adminExists = await User.findOne({ username: "admin" });
+    if (adminExists) {
       return NextResponse.json(
-        { message: "Users already exist. Skipping seed." },
+        { message: "Admin user already exists. Skipping seed." },
         { status: 200 }
       );
     }
 
     const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash("password", salt);
+    const password = await bcrypt.hash("admin123", salt);
 
     const users = [
       {
