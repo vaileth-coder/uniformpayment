@@ -43,7 +43,7 @@ export async function GET() {
     await User.insertMany(users);
 
     return NextResponse.json({ message: "Seed successful. Created 3 users." });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Seed error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

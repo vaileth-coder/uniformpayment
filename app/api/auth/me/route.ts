@@ -20,7 +20,7 @@ export async function GET() {
         role: payload.role,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ user: null }, { status: 401 });
   }
 }

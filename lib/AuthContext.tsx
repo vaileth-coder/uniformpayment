@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(data.user);
         }
       } catch (error) {
-        console.error("Failed to load user");
+        console.error("Failed to load user", error);
       } finally {
         setLoading(false);
       }

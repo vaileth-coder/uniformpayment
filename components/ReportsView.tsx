@@ -23,7 +23,7 @@ export function ReportsView() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--muted)]">
-            Today's Sales
+            Today&apos;s Sales
           </h3>
           <p className="mt-2 text-3xl font-bold text-[var(--text)]">
             {formatTzs(todaySales)}

@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 const secretKey = process.env.JWT_SECRET || "default_super_secret_key_for_development";
 const key = new TextEncoder().encode(secretKey);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function encrypt(payload: any) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -11,6 +12,7 @@ export async function encrypt(payload: any) {
     .sign(key);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function decrypt(input: string): Promise<any> {
   const { payload } = await jwtVerify(input, key, {
     algorithms: ["HS256"],
