@@ -21,28 +21,16 @@ export async function GET() {
 
     const users = [
       {
-        username: "director",
+        username: "admin",
         password,
         name: "School Director",
         role: "director",
-      },
-      {
-        username: "mhasibu",
-        password,
-        name: "Accountant",
-        role: "accountant",
-      },
-      {
-        username: "muuzaji",
-        password,
-        name: "Seller / Cashier",
-        role: "seller",
       },
     ];
 
     await User.insertMany(users);
 
-    return NextResponse.json({ message: "Seed successful. Created 3 users." });
+    return NextResponse.json({ message: "Seed successful. Created admin user." });
   } catch (error: unknown) {
     console.error("Seed error:", error);
     return NextResponse.json(

@@ -6,10 +6,11 @@ import { LoginScreen } from "@/components/LoginScreen";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { UniformPaymentApp } from "@/components/UniformPaymentApp";
 import { ReportsView } from "@/components/ReportsView";
+import { UserManagementView } from "@/components/UserManagementView";
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<"sales" | "reports">("sales");
+  const [activeTab, setActiveTab] = useState<"sales" | "reports" | "users">("sales");
 
   if (loading) {
     return (
@@ -66,9 +67,21 @@ export default function Home() {
           >
             Reports
           </button>
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              activeTab === "users"
+                ? "bg-[var(--accent)] text-white"
+                : "text-[var(--muted)] hover:bg-[var(--surface-2)]"
+            }`}
+          >
+            User Management
+          </button>
         </div>
 
-        {activeTab === "sales" ? <UniformPaymentApp /> : <ReportsView />}
+        {activeTab === "sales" && <UniformPaymentApp />}
+        {activeTab === "reports" && <ReportsView />}
+        {activeTab === "users" && <UserManagementView />}
       </DashboardLayout>
     );
   }
