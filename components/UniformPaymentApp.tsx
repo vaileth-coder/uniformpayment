@@ -8,7 +8,7 @@ import type {
   StepId,
   Student,
 } from "@/lib/types";
-import { findStudent, DEMO_STUDENTS } from "@/lib/students";
+import { findStudent, allStudents, registerStudent } from "@/lib/students";
 import { itemsForLevel, UNIFORM_ITEMS } from "@/lib/uniforms";
 import { formatTzs } from "@/lib/money";
 
@@ -139,6 +139,13 @@ export function UniformPaymentApp() {
     setIdError(null);
   };
 
+  const handleRegisterStudent = (newStudent: Student) => {
+    registerStudent(newStudent);
+    setStudent(newStudent);
+    setCart([]);
+    setStep("select-uniform");
+  };
+
   return (
     <div className="min-h-screen pb-12">
       <header className="border-b border-[var(--border)] bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--surface-2)]/90 backdrop-blur">
@@ -194,6 +201,14 @@ export function UniformPaymentApp() {
               onChange={setStudentIdInput}
               error={idError}
               onSubmit={handleVerifyStudent}
+              onRegister={() => setStep("register-student")}
+            />
+          )}
+
+          {step === "register-student" && (
+            <RegisterStudentStep
+              onCancel={() => setStep("student-id")}
+              onRegister={handleRegisterStudent}
             />
           )}
 
@@ -249,11 +264,13 @@ function StudentIdStep({
   onChange,
   error,
   onSubmit,
+  onRegister,
 }: {
   value: string;
   onChange: (v: string) => void;
   error: string | null;
   onSubmit: () => void;
+  onRegister: () => void;
 }) {
   return (
     <section aria-labelledby="step1-h">
@@ -284,15 +301,104 @@ function StudentIdStep({
       ) : null}
       <p className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">
         <strong className="text-[var(--text)]">Sample IDs:</strong>{" "}
-        {DEMO_STUDENTS.map((s) => s.id).join(", ")}
+        {allStudents.map((s) => s.id).join(", ")}
       </p>
-      <button
-        type="button"
-        onClick={onSubmit}
-        className="mt-6 w-full rounded-xl bg-[var(--accent)] py-3 text-sm font-bold text-white hover:brightness-110 sm:w-auto sm:px-10"
-      >
-        Verify and continue
-      </button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={onSubmit}
+          className="w-full rounded-xl bg-[var(--accent)] py-3 text-sm font-bold text-white hover:brightness-110 sm:w-auto sm:px-10"
+        >
+          Verify and continue
+        </button>
+        <button
+          type="button"
+          onClick={onRegister}
+          className="w-full rounded-xl border border-[var(--border)] py-3 text-sm font-bold text-[var(--text)] hover:bg-[var(--surface-2)] sm:w-auto sm:px-10"
+        >
+          Register New Student
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function RegisterStudentStep({
+  onCancel,
+  onRegister,
+}: {
+  onCancel: () => void;
+  onRegister: (student: Student) => void;
+}) {
+  const [fullName, setFullName] = useState("");
+  const [className, setClassName] = useState("");
+  const [level, setLevel] = useState<"primary" | "secondary">("primary");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = "STU" + String(Math.floor(Math.random() * 900) + 100);
+    onRegister({ id, fullName, className, level });
+  };
+
+  return (
+    <section aria-labelledby="register-h">
+      <h2 id="register-h" className="text-lg font-semibold text-[var(--text)]">
+        Register New Student
+      </h2>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <label className="block">
+          <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+            Full Name
+          </span>
+          <input
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+            autoFocus
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+            Class Name
+          </span>
+          <input
+            required
+            value={className}
+            onChange={(e) => setClassName(e.target.value)}
+            placeholder="e.g. Grade 1"
+            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+            School Level
+          </span>
+          <select
+            value={level}
+            onChange={(e) => setLevel(e.target.value as "primary" | "secondary")}
+            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-[var(--text)] outline-none focus:border-[var(--accent)]"
+          >
+            <option value="primary">Primary</option>
+            <option value="secondary">Secondary</option>
+          </select>
+        </label>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--muted)]"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="rounded-xl bg-[var(--accent)] px-8 py-2.5 text-sm font-bold text-white hover:brightness-110"
+          >
+            Register & Continue
+          </button>
+        </div>
+      </form>
     </section>
   );
 }

@@ -28,7 +28,13 @@ export const DEMO_STUDENTS: Student[] = [
   },
 ];
 
+export const allStudents = [...DEMO_STUDENTS];
+
 export function findStudent(id: string): Student | null {
   const norm = id.trim().toUpperCase();
-  return DEMO_STUDENTS.find((s) => s.id === norm) ?? null;
+  return allStudents.find((s) => s.id === norm) ?? null;
+}
+
+export function registerStudent(student: Student) {
+  allStudents.push(student);
 }

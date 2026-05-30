@@ -35,6 +35,7 @@ export interface Receipt {
 
 export type StepId =
   | "student-id"
+  | "register-student"
   | "select-uniform"
   | "invoice"
   | "payment"
