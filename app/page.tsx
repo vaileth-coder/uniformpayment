@@ -7,10 +7,11 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { UniformPaymentApp } from "@/components/UniformPaymentApp";
 import { ReportsView } from "@/components/ReportsView";
 import { UserManagementView } from "@/components/UserManagementView";
+import { StudentRegistrationView } from "@/components/StudentRegistrationView";
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<"sales" | "reports" | "users">("sales");
+  const [activeTab, setActiveTab] = useState<"sales" | "reports" | "users" | "students">("sales");
 
   if (loading) {
     return (
@@ -77,11 +78,22 @@ export default function Home() {
           >
             User Management
           </button>
+          <button
+            onClick={() => setActiveTab("students")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              activeTab === "students"
+                ? "bg-[var(--accent)] text-white"
+                : "text-[var(--muted)] hover:bg-[var(--surface-2)]"
+            }`}
+          >
+            Register Student
+          </button>
         </div>
 
         {activeTab === "sales" && <UniformPaymentApp />}
         {activeTab === "reports" && <ReportsView />}
         {activeTab === "users" && <UserManagementView />}
+        {activeTab === "students" && <StudentRegistrationView />}
       </DashboardLayout>
     );
   }
