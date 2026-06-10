@@ -26,7 +26,20 @@ export function ReportsView() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"financials" | "inventory" | "eod">("financials");
+  const [activeTab, setActiveTab] = useState<"financials" | "inventory" | "eod" | "monthly" | "yearly">("financials");
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedYearOnly, setSelectedYearOnly] = useState(currentYear);
+
+  const MONTHS_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const yearsList = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
   const fetchReportsData = async () => {
     try {
@@ -135,6 +148,74 @@ export function ReportsView() {
     .filter((s) => s.status === "approved" && s.paymentMethod === "bank")
     .reduce((sum, s) => sum + s.total, 0);
 
+  // Selected Month calculations
+  const monthlyTransactions = sales.filter((s) => {
+    const d = new Date(s.paidAt);
+    return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+  });
+  const monthlyApprovedSales = monthlyTransactions.filter((s) => s.status === "approved");
+  const monthlyPendingSales = monthlyTransactions.filter((s) => s.status === "pending");
+
+  const monthlyApprovedSalesTotal = monthlyApprovedSales.reduce((sum, s) => sum + s.total, 0);
+  const monthlyPendingSalesTotal = monthlyPendingSales.reduce((sum, s) => sum + s.total, 0);
+  const monthlyItemsSoldTotal = monthlyApprovedSales.reduce(
+    (sum, s) => sum + s.lines.reduce((lsum, l) => lsum + l.quantity, 0),
+    0
+  );
+
+  const monthlyCashTotal = monthlyApprovedSales
+    .filter((s) => s.paymentMethod === "cash")
+    .reduce((sum, s) => sum + s.total, 0);
+  const monthlyMobileTotal = monthlyApprovedSales
+    .filter((s) => s.paymentMethod === "mobile")
+    .reduce((sum, s) => sum + s.total, 0);
+  const monthlyBankTotal = monthlyApprovedSales
+    .filter((s) => s.paymentMethod === "bank")
+    .reduce((sum, s) => sum + s.total, 0);
+
+  // Daily totals breakdown for selected month
+  const daysInMonthCount = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+  const dailyBreakdown = Array.from({ length: daysInMonthCount }, (_, i) => {
+    const day = i + 1;
+    const dayTransactions = monthlyApprovedSales.filter((s) => new Date(s.paidAt).getDate() === day);
+    const totalAmount = dayTransactions.reduce((sum, s) => sum + s.total, 0);
+    const count = dayTransactions.length;
+    return { day, totalAmount, count };
+  }).filter((d) => d.count > 0);
+
+  // Selected Year calculations
+  const yearlyTransactions = sales.filter((s) => {
+    const d = new Date(s.paidAt);
+    return d.getFullYear() === selectedYearOnly;
+  });
+  const yearlyApprovedSales = yearlyTransactions.filter((s) => s.status === "approved");
+  const yearlyPendingSales = yearlyTransactions.filter((s) => s.status === "pending");
+
+  const yearlyApprovedSalesTotal = yearlyApprovedSales.reduce((sum, s) => sum + s.total, 0);
+  const yearlyPendingSalesTotal = yearlyPendingSales.reduce((sum, s) => sum + s.total, 0);
+  const yearlyItemsSoldTotal = yearlyApprovedSales.reduce(
+    (sum, s) => sum + s.lines.reduce((lsum, l) => lsum + l.quantity, 0),
+    0
+  );
+
+  const yearlyCashTotal = yearlyApprovedSales
+    .filter((s) => s.paymentMethod === "cash")
+    .reduce((sum, s) => sum + s.total, 0);
+  const yearlyMobileTotal = yearlyApprovedSales
+    .filter((s) => s.paymentMethod === "mobile")
+    .reduce((sum, s) => sum + s.total, 0);
+  const yearlyBankTotal = yearlyApprovedSales
+    .filter((s) => s.paymentMethod === "bank")
+    .reduce((sum, s) => sum + s.total, 0);
+
+  // Monthly breakdown for selected year
+  const monthlyBreakdown = Array.from({ length: 12 }, (_, monthIdx) => {
+    const monthTransactions = yearlyApprovedSales.filter((s) => new Date(s.paidAt).getMonth() === monthIdx);
+    const totalAmount = monthTransactions.reduce((sum, s) => sum + s.total, 0);
+    const count = monthTransactions.length;
+    return { monthName: MONTHS_NAMES[monthIdx], totalAmount, count };
+  });
+
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -169,7 +250,7 @@ export function ReportsView() {
         </div>
         
         {/* Navigation Tabs */}
-        <div className="flex rounded-lg bg-black/20 p-1">
+        <div className="flex flex-wrap rounded-lg bg-black/20 p-1 gap-1">
           <button
             onClick={() => setActiveTab("financials")}
             className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
@@ -193,6 +274,22 @@ export function ReportsView() {
             }`}
           >
             Ripoti ya Jioni
+          </button>
+          <button
+            onClick={() => setActiveTab("monthly")}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
+              activeTab === "monthly" ? "bg-white text-[var(--secondary)] shadow-sm" : "hover:bg-white/10"
+            }`}
+          >
+            Ripoti ya Mwezi
+          </button>
+          <button
+            onClick={() => setActiveTab("yearly")}
+            className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
+              activeTab === "yearly" ? "bg-white text-[var(--secondary)] shadow-sm" : "hover:bg-white/10"
+            }`}
+          >
+            Ripoti ya Mwaka
           </button>
         </div>
       </div>
@@ -488,6 +585,224 @@ export function ReportsView() {
                       </tr>
                     ))
                   )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "monthly" && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-6">
+          {/* Header & Selectors */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border)] pb-4">
+            <div>
+              <h3 className="text-base font-bold text-[var(--text)]">Ripoti ya Mwezi (Monthly Report)</h3>
+              <p className="text-xs text-[var(--muted)] mt-0.5">
+                Uchambuzi wa mwezi: {MONTHS_NAMES[selectedMonth]} {selectedYear}
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs text-[var(--text)] outline-none"
+              >
+                {MONTHS_NAMES.map((name, idx) => (
+                  <option key={idx} value={idx}>{name}</option>
+                ))}
+              </select>
+              
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs text-[var(--text)] outline-none"
+              >
+                {yearsList.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => window.print()}
+                className="rounded-lg bg-[var(--accent)] px-4 py-2 text-xs font-bold text-white hover:brightness-110 flex items-center gap-1.5 shadow"
+              >
+                Print
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div className="rounded-xl border border-[var(--border)] bg-green-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-green-400 tracking-wider">Approved Sales</h4>
+              <p className="mt-1 text-xl font-black text-green-500">{formatTzs(monthlyApprovedSalesTotal)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-amber-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Pending Sales</h4>
+              <p className="mt-1 text-xl font-black text-amber-500">{formatTzs(monthlyPendingSalesTotal)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-blue-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-blue-400 tracking-wider">Transactions</h4>
+              <p className="mt-1 text-xl font-black text-blue-400">{monthlyTransactions.length}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-purple-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-purple-400 tracking-wider">Uniforms Sold</h4>
+              <p className="mt-1 text-xl font-black text-purple-400">{monthlyItemsSoldTotal}</p>
+            </div>
+          </div>
+
+          {/* Payment Methods */}
+          <div className="rounded-xl border border-[var(--border)] p-4 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Njia za Malipo (Approved Only)</h4>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-4 py-3 text-xs">
+                <span className="font-semibold text-[var(--muted)]">Cash</span>
+                <span className="font-bold text-[var(--text)]">{formatTzs(monthlyCashTotal)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-4 py-3 text-xs">
+                <span className="font-semibold text-[var(--muted)]">Mobile Money</span>
+                <span className="font-bold text-[var(--text)]">{formatTzs(monthlyMobileTotal)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-4 py-3 text-xs">
+                <span className="font-semibold text-[var(--muted)]">Bank Transfer</span>
+                <span className="font-bold text-[var(--text)]">{formatTzs(monthlyBankTotal)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Daily breakdown table */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Mauzo ya Kila Siku (Daily Breakdown)</h4>
+            <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-[var(--surface-2)] uppercase text-[var(--muted)]">
+                  <tr>
+                    <th className="px-4 py-2.5">Tarehe (Day)</th>
+                    <th className="px-4 py-2.5">Idadi ya Miamala</th>
+                    <th className="px-4 py-2.5 text-right">Jumla ya Fedha (Approved)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {dailyBreakdown.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-6 text-center text-[var(--muted)]">
+                        Hakuna mauzo yoyote yaliyofanyika mwezi huu.
+                      </td>
+                    </tr>
+                  ) : (
+                    dailyBreakdown.map((d) => (
+                      <tr key={d.day} className="hover:bg-[var(--surface-2)]/20">
+                        <td className="px-4 py-3 font-semibold text-[var(--text)]">
+                          {d.day} {MONTHS_NAMES[selectedMonth]} {selectedYear}
+                        </td>
+                        <td className="px-4 py-3">{d.count}</td>
+                        <td className="px-4 py-3 text-right font-bold text-[var(--text)]">{formatTzs(d.totalAmount)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "yearly" && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm space-y-6">
+          {/* Header & Selectors */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border)] pb-4">
+            <div>
+              <h3 className="text-base font-bold text-[var(--text)]">Ripoti ya Mwaka (Yearly Report)</h3>
+              <p className="text-xs text-[var(--muted)] mt-0.5">
+                Uchambuzi wa mwaka: {selectedYearOnly}
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <select
+                value={selectedYearOnly}
+                onChange={(e) => setSelectedYearOnly(Number(e.target.value))}
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs text-[var(--text)] outline-none"
+              >
+                {yearsList.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => window.print()}
+                className="rounded-lg bg-[var(--accent)] px-4 py-2 text-xs font-bold text-white hover:brightness-110 flex items-center gap-1.5 shadow"
+              >
+                Print
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div className="rounded-xl border border-[var(--border)] bg-green-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-green-400 tracking-wider">Approved Sales</h4>
+              <p className="mt-1 text-xl font-black text-green-500">{formatTzs(yearlyApprovedSalesTotal)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-amber-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Pending Sales</h4>
+              <p className="mt-1 text-xl font-black text-amber-500">{formatTzs(yearlyPendingSalesTotal)}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-blue-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-blue-400 tracking-wider">Transactions</h4>
+              <p className="mt-1 text-xl font-black text-blue-400">{yearlyTransactions.length}</p>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-purple-500/5 p-4">
+              <h4 className="text-[10px] font-bold uppercase text-purple-400 tracking-wider">Uniforms Sold</h4>
+              <p className="mt-1 text-xl font-black text-purple-400">{yearlyItemsSoldTotal}</p>
+            </div>
+          </div>
+
+          {/* Payment Methods */}
+          <div className="rounded-xl border border-[var(--border)] p-4 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Njia za Malipo (Approved Only)</h4>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-4 py-3 text-xs">
+                <span className="font-semibold text-[var(--muted)]">Cash</span>
+                <span className="font-bold text-[var(--text)]">{formatTzs(yearlyCashTotal)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-4 py-3 text-xs">
+                <span className="font-semibold text-[var(--muted)]">Mobile Money</span>
+                <span className="font-bold text-[var(--text)]">{formatTzs(yearlyMobileTotal)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--surface-2)] px-4 py-3 text-xs">
+                <span className="font-semibold text-[var(--muted)]">Bank Transfer</span>
+                <span className="font-bold text-[var(--text)]">{formatTzs(yearlyBankTotal)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Monthly breakdown table */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Mauzo ya Kila Mwezi (Monthly Breakdown)</h4>
+            <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-[var(--surface-2)] uppercase text-[var(--muted)]">
+                  <tr>
+                    <th className="px-4 py-2.5">Mwezi (Month)</th>
+                    <th className="px-4 py-2.5">Idadi ya Miamala</th>
+                    <th className="px-4 py-2.5 text-right">Jumla ya Fedha (Approved)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {monthlyBreakdown.map((m) => (
+                    <tr key={m.monthName} className="hover:bg-[var(--surface-2)]/20">
+                      <td className="px-4 py-3 font-semibold text-[var(--text)]">
+                        {m.monthName} {selectedYearOnly}
+                      </td>
+                      <td className="px-4 py-3">{m.count}</td>
+                      <td className="px-4 py-3 text-right font-bold text-[var(--text)]">
+                        {m.totalAmount > 0 ? formatTzs(m.totalAmount) : "—"}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
