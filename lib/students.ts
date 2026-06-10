@@ -28,7 +28,19 @@ export const DEMO_STUDENTS: Student[] = [
   },
 ];
 
-export const allStudents = [...DEMO_STUDENTS];
+export const allStudents: Student[] = [...DEMO_STUDENTS];
+
+if (typeof window !== "undefined") {
+  const stored = localStorage.getItem("custom_students");
+  if (stored) {
+    try {
+      const custom = JSON.parse(stored) as Student[];
+      allStudents.push(...custom);
+    } catch (e) {
+      console.error("Error loading students from localStorage", e);
+    }
+  }
+}
 
 export function findStudent(id: string): Student | null {
   const norm = id.trim().toUpperCase();
@@ -37,4 +49,15 @@ export function findStudent(id: string): Student | null {
 
 export function registerStudent(student: Student) {
   allStudents.push(student);
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("custom_students");
+    let custom: Student[] = [];
+    if (stored) {
+      try {
+        custom = JSON.parse(stored) as Student[];
+      } catch (e) {}
+    }
+    custom.push(student);
+    localStorage.setItem("custom_students", JSON.stringify(custom));
+  }
 }
