@@ -55,7 +55,7 @@ export function registerStudent(student: Student) {
     if (stored) {
       try {
         custom = JSON.parse(stored) as Student[];
-      } catch (e) {}
+      } catch {}
     }
     custom.push(student);
     localStorage.setItem("custom_students", JSON.stringify(custom));

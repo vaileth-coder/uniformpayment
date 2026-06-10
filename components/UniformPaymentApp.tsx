@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type {
   CartSelection,
   PaymentMethod,
@@ -8,7 +8,6 @@ import type {
   StepId,
   Student,
 } from "@/lib/types";
-import { findStudent, allStudents, registerStudent } from "@/lib/students";
 import { itemsForLevel, UNIFORM_ITEMS } from "@/lib/uniforms";
 import { formatTzs } from "@/lib/money";
 
@@ -36,6 +35,22 @@ export function UniformPaymentApp() {
   const [cart, setCart] = useState<CartSelection[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mobile");
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [studentsList, setStudentsList] = useState<Student[]>([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await fetch("/api/students");
+        if (res.ok) {
+          const data = await res.json();
+          setStudentsList(data.students || []);
+        }
+      } catch (e) {
+        console.error("Failed to fetch students", e);
+      }
+    };
+    fetchStudents();
+  }, []);
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
 
@@ -71,9 +86,10 @@ export function UniformPaymentApp() {
   );
 
   const handleVerifyStudent = () => {
-    const found = findStudent(studentIdInput);
+    const norm = studentIdInput.trim().toUpperCase();
+    const found = studentsList.find((s) => s.id === norm);
     if (!found) {
-      setIdError("Student ID not found. Try STU001, STU002, STU003, or STU004.");
+      setIdError("Student ID not found. Please verify the ID or register the student first.");
       setStudent(null);
       return;
     }
@@ -110,9 +126,9 @@ export function UniformPaymentApp() {
     );
   };
 
-  const confirmPayment = () => {
+  const confirmPayment = async () => {
     if (!student || lineDetails.length === 0) return;
-    const r: Receipt = {
+    const r = {
       receiptNo: receiptNo(),
       paidAt: new Date().toISOString(),
       student,
@@ -126,8 +142,24 @@ export function UniformPaymentApp() {
       total,
       paymentMethod,
     };
-    setReceipt(r);
-    setStep("receipt");
+
+    try {
+      const res = await fetch("/api/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(r),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReceipt(data.sale);
+        setStep("receipt");
+      } else {
+        alert(data.error || "Failed to confirm payment");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to confirm payment");
+    }
   };
 
   const startOver = () => {
@@ -140,7 +172,6 @@ export function UniformPaymentApp() {
   };
 
   const handleRegisterStudent = (newStudent: Student) => {
-    registerStudent(newStudent);
     setStudent(newStudent);
     setCart([]);
     setStep("select-uniform");
@@ -201,6 +232,7 @@ export function UniformPaymentApp() {
               onChange={setStudentIdInput}
               error={idError}
               onSubmit={handleVerifyStudent}
+              studentsList={studentsList}
             />
           )}
 
@@ -263,11 +295,13 @@ function StudentIdStep({
   onChange,
   error,
   onSubmit,
+  studentsList,
 }: {
   value: string;
   onChange: (v: string) => void;
   error: string | null;
   onSubmit: () => void;
+  studentsList: Student[];
 }) {
   return (
     <section aria-labelledby="step1-h">
@@ -298,7 +332,7 @@ function StudentIdStep({
       ) : null}
       <p className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">
         <strong className="text-[var(--text)]">Sample IDs:</strong>{" "}
-        {allStudents.map((s) => s.id).join(", ")}
+        {studentsList.map((s) => s.id).join(", ")}
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <button
@@ -722,6 +756,15 @@ function ReceiptStep({
         <p className="text-center text-xs uppercase tracking-widest text-[var(--muted)]">
           Official receipt (sample)
         </p>
+        <div className="text-center mt-1.5 mb-2">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
+            receipt.status === "approved"
+              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+          }`}>
+            {receipt.status === "approved" ? "Approved (Imethibitishwa)" : "Pending Approval (Inasubiri)"}
+          </span>
+        </div>
         <p className="mt-2 text-center text-lg font-bold text-[var(--secondary)]">
           {receipt.receiptNo}
         </p>

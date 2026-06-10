@@ -25,6 +25,8 @@ export interface CartSelection {
 export type PaymentMethod = "cash" | "mobile" | "bank";
 
 export interface Receipt {
+  _id?: string;
+  status?: "pending" | "approved";
   receiptNo: string;
   paidAt: string;
   student: Student;

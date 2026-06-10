@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Student } from "@/lib/types";
-import { registerStudent, allStudents } from "@/lib/students";
 
 export function StudentRegistrationView() {
   const [fullName, setFullName] = useState("");
@@ -11,25 +10,68 @@ export function StudentRegistrationView() {
   const [successMsg, setSuccessMsg] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
 
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch("/api/students");
+      if (res.ok) {
+        const data = await res.json();
+        setStudents(data.students || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch students:", error);
+    }
+  };
+
   useEffect(() => {
-    setStudents([...allStudents]);
+    fetchStudents();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const id = "STU" + String(Math.floor(Math.random() * 900) + 100);
-    const newStudent: Student = { id, fullName, className, level };
-    registerStudent(newStudent);
-    setStudents([...allStudents]);
+    const newStudent = { id, fullName, className, level };
     
-    setSuccessMsg(`Student ${fullName} registered successfully with ID: ${id}`);
-    setFullName("");
-    setClassName("");
-    setLevel("primary");
+    try {
+      const res = await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newStudent),
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessMsg(`Student ${fullName} registered successfully with ID: ${id}`);
+        setFullName("");
+        setClassName("");
+        setLevel("primary");
+        fetchStudents();
+      } else {
+        setSuccessMsg(data.error || "Failed to register student");
+      }
+    } catch {
+      setSuccessMsg("Failed to register student");
+    }
     
     setTimeout(() => {
       setSuccessMsg("");
     }, 5000);
+  };
+
+  const handleDeleteStudent = async (studentId: string) => {
+    if (!confirm("Are you sure you want to delete this student?")) return;
+    try {
+      const res = await fetch(`/api/students?id=${studentId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchStudents();
+      } else {
+        alert(data.error || "Failed to delete student");
+      }
+    } catch {
+      alert("Failed to delete student");
+    }
   };
 
   const primaryStudents = students.filter((s) => s.level === "primary");
@@ -125,7 +167,8 @@ export function StudentRegistrationView() {
                     <tr className="border-b border-[var(--border)] text-left uppercase text-[var(--muted)]">
                       <th className="pb-2 pr-2">ID</th>
                       <th className="pb-2 pr-2">Full Name</th>
-                      <th className="pb-2">Class</th>
+                      <th className="pb-2 pr-2">Class</th>
+                      <th className="pb-2 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]/40">
@@ -137,8 +180,16 @@ export function StudentRegistrationView() {
                         <td className="py-2.5 pr-2 text-[var(--text)] font-medium">
                           {student.fullName}
                         </td>
-                        <td className="py-2.5 text-[var(--muted)]">
+                        <td className="py-2.5 pr-2 text-[var(--muted)]">
                           {student.className}
+                        </td>
+                        <td className="py-2.5 text-right">
+                          <button
+                            onClick={() => handleDeleteStudent(student.id)}
+                            className="text-red-400 hover:text-red-500 font-semibold transition"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -171,7 +222,8 @@ export function StudentRegistrationView() {
                     <tr className="border-b border-[var(--border)] text-left uppercase text-[var(--muted)]">
                       <th className="pb-2 pr-2">ID</th>
                       <th className="pb-2 pr-2">Full Name</th>
-                      <th className="pb-2">Class</th>
+                      <th className="pb-2 pr-2">Class</th>
+                      <th className="pb-2 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]/40">
@@ -183,8 +235,16 @@ export function StudentRegistrationView() {
                         <td className="py-2.5 pr-2 text-[var(--text)] font-medium">
                           {student.fullName}
                         </td>
-                        <td className="py-2.5 text-[var(--muted)]">
+                        <td className="py-2.5 pr-2 text-[var(--muted)]">
                           {student.className}
+                        </td>
+                        <td className="py-2.5 text-right">
+                          <button
+                            onClick={() => handleDeleteStudent(student.id)}
+                            className="text-red-400 hover:text-red-500 font-semibold transition"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}

@@ -32,7 +32,7 @@ export function UserManagementView() {
         setUsers(data.users);
       }
     } catch (error) {
-      console.error("Failed to fetch users");
+      console.error("Failed to fetch users", error);
     } finally {
       setLoading(false);
     }
@@ -79,6 +79,26 @@ export function UserManagementView() {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    setFormError("");
+    setFormSuccess("");
+    try {
+      const res = await fetch(`/api/users?id=${userId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFormSuccess("User deleted successfully!");
+        fetchUsers();
+      } else {
+        setFormError(data.error || "Failed to delete user");
+      }
+    } catch {
+      setFormError("Failed to delete user");
     }
   };
 
@@ -216,6 +236,7 @@ export function UserManagementView() {
                     <th className="px-6 py-3">Username</th>
                     <th className="px-6 py-3">Role</th>
                     <th className="px-6 py-3">Date Added</th>
+                    <th className="px-6 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
@@ -251,6 +272,16 @@ export function UserManagementView() {
                         </td>
                         <td className="px-6 py-4 text-[var(--muted)]">
                           {new Date(u.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {u.role !== "director" && (
+                            <button
+                              onClick={() => handleDeleteUser(u._id)}
+                              className="text-red-400 hover:text-red-500 font-semibold text-xs transition"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
