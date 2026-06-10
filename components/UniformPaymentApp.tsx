@@ -201,7 +201,6 @@ export function UniformPaymentApp() {
               onChange={setStudentIdInput}
               error={idError}
               onSubmit={handleVerifyStudent}
-              onRegister={() => setStep("register-student")}
             />
           )}
 
@@ -264,13 +263,11 @@ function StudentIdStep({
   onChange,
   error,
   onSubmit,
-  onRegister,
 }: {
   value: string;
   onChange: (v: string) => void;
   error: string | null;
   onSubmit: () => void;
-  onRegister: () => void;
 }) {
   return (
     <section aria-labelledby="step1-h">
@@ -310,13 +307,6 @@ function StudentIdStep({
           className="w-full rounded-xl bg-[var(--accent)] py-3 text-sm font-bold text-white hover:brightness-110 sm:w-auto sm:px-10"
         >
           Verify and continue
-        </button>
-        <button
-          type="button"
-          onClick={onRegister}
-          className="w-full rounded-xl border border-[var(--border)] py-3 text-sm font-bold text-[var(--text)] hover:bg-[var(--surface-2)] sm:w-auto sm:px-10"
-        >
-          Register New Student
         </button>
       </div>
     </section>
