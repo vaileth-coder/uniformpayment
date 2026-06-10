@@ -32,6 +32,9 @@ export function StudentRegistrationView() {
     }, 5000);
   };
 
+  const primaryStudents = students.filter((s) => s.level === "primary");
+  const secondaryStudents = students.filter((s) => s.level === "secondary");
+
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl sm:p-8">
       <h2 className="text-xl font-bold text-[var(--text)] mb-6">
@@ -94,44 +97,102 @@ export function StudentRegistrationView() {
       </form>
 
       <div className="mt-8 border-t border-[var(--border)] pt-8">
-        <h3 className="text-lg font-bold text-[var(--text)] mb-4">
+        <h3 className="text-lg font-bold text-[var(--text)] mb-6">
           Registered Students ({students.length})
         </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-left text-xs uppercase text-[var(--muted)]">
-                <th className="pb-3 pr-4">Student ID</th>
-                <th className="pb-3 pr-4">Full Name</th>
-                <th className="pb-3 pr-4">Class</th>
-                <th className="pb-3">Level</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {students.map((student) => (
-                <tr key={student.id} className="hover:bg-[var(--surface-2)]/50">
-                  <td className="py-3 pr-4 font-mono font-bold text-[var(--secondary)]">
-                    {student.id}
-                  </td>
-                  <td className="py-3 pr-4 text-[var(--text)] font-medium">
-                    {student.fullName}
-                  </td>
-                  <td className="py-3 pr-4 text-[var(--muted)]">
-                    {student.className}
-                  </td>
-                  <td className="py-3 capitalize text-[var(--muted)]">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                      student.level === "primary"
-                        ? "bg-blue-500/10 text-blue-400"
-                        : "bg-purple-500/10 text-purple-400"
-                    }`}>
-                      {student.level}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Primary Level */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/30 p-5">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--text)] mb-4 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-blue-500"></span>
+                Primary Level
+              </span>
+              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-400">
+                {primaryStudents.length}
+              </span>
+            </h4>
+            
+            {primaryStudents.length === 0 ? (
+              <p className="text-xs text-[var(--muted)] py-4 text-center">
+                No primary students registered.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-left uppercase text-[var(--muted)]">
+                      <th className="pb-2 pr-2">ID</th>
+                      <th className="pb-2 pr-2">Full Name</th>
+                      <th className="pb-2">Class</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]/40">
+                    {primaryStudents.map((student) => (
+                      <tr key={student.id} className="hover:bg-[var(--surface-2)]/40">
+                        <td className="py-2.5 pr-2 font-mono font-bold text-[var(--secondary)]">
+                          {student.id}
+                        </td>
+                        <td className="py-2.5 pr-2 text-[var(--text)] font-medium">
+                          {student.fullName}
+                        </td>
+                        <td className="py-2.5 text-[var(--muted)]">
+                          {student.className}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Secondary Level */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/30 p-5">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--text)] mb-4 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-purple-500"></span>
+                Secondary Level
+              </span>
+              <span className="rounded-full bg-purple-500/10 px-2 py-0.5 text-xs font-semibold text-purple-400">
+                {secondaryStudents.length}
+              </span>
+            </h4>
+            
+            {secondaryStudents.length === 0 ? (
+              <p className="text-xs text-[var(--muted)] py-4 text-center">
+                No secondary students registered.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-left uppercase text-[var(--muted)]">
+                      <th className="pb-2 pr-2">ID</th>
+                      <th className="pb-2 pr-2">Full Name</th>
+                      <th className="pb-2">Class</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]/40">
+                    {secondaryStudents.map((student) => (
+                      <tr key={student.id} className="hover:bg-[var(--surface-2)]/40">
+                        <td className="py-2.5 pr-2 font-mono font-bold text-[var(--secondary)]">
+                          {student.id}
+                        </td>
+                        <td className="py-2.5 pr-2 text-[var(--text)] font-medium">
+                          {student.fullName}
+                        </td>
+                        <td className="py-2.5 text-[var(--muted)]">
+                          {student.className}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
