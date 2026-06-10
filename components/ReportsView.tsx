@@ -34,6 +34,15 @@ export function ReportsView() {
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedYearOnly, setSelectedYearOnly] = useState(currentYear);
 
+  // Editing and Adding Stock states
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editStockValues, setEditStockValues] = useState<{ [size: string]: number }>({});
+  
+  const [showAddInventory, setShowAddInventory] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemId, setNewItemId] = useState("");
+  const [newItemSizes, setNewItemSizes] = useState("XS, S, M, L, XL");
+
   const MONTHS_NAMES = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -104,6 +113,93 @@ export function ReportsView() {
       }
     } catch {
       alert("Failed to delete transaction");
+    }
+  };
+
+  const startEditingInventory = (item: InventoryItem) => {
+    setEditingItemId(item._id);
+    const initialVals: { [size: string]: number } = {};
+    item.stock.forEach((st) => {
+      initialVals[st.size] = st.initial;
+    });
+    setEditStockValues(initialVals);
+  };
+
+  const handleSaveInventoryStock = async (id: string) => {
+    try {
+      const stockArray = Object.keys(editStockValues).map((size) => ({
+        size,
+        initial: editStockValues[size],
+      }));
+
+      const res = await fetch("/api/inventory", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, stock: stockArray }),
+      });
+
+      if (res.ok) {
+        setEditingItemId(null);
+        fetchReportsData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update stock");
+      }
+    } catch {
+      alert("Error updating stock");
+    }
+  };
+
+  const handleDeleteInventoryItem = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this uniform item from inventory? This will permanently remove it.")) return;
+    try {
+      const res = await fetch(`/api/inventory?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        fetchReportsData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete item");
+      }
+    } catch {
+      alert("Error deleting item");
+    }
+  };
+
+  const handleCreateInventoryItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newItemName || !newItemId || !newItemSizes) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const sizesArray = newItemSizes.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          itemId: newItemId,
+          itemName: newItemName,
+          sizes: sizesArray,
+        }),
+      });
+
+      if (res.ok) {
+        setShowAddInventory(false);
+        setNewItemName("");
+        setNewItemId("");
+        setNewItemSizes("XS, S, M, L, XL");
+        fetchReportsData();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to create item");
+      }
+    } catch {
+      alert("Error creating item");
     }
   };
 
@@ -418,54 +514,201 @@ export function ReportsView() {
 
       {activeTab === "inventory" && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-[var(--text)]">Usimamizi wa Stoku & Mzigo</h3>
-            <p className="text-xs text-[var(--muted)] mt-0.5">
-              Hapa inaonyesha idadi ya mzigo uliotoka (sold) na mzigo uliobaki store kwa kila saizi ya sare.
-            </p>
+          {/* Header & Add Button */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-base font-bold text-[var(--text)]">Usimamizi wa Stoku & Mzigo</h3>
+              <p className="text-xs text-[var(--muted)] mt-0.5">
+                Hapa inaonyesha idadi ya mzigo uliotoka (sold) na mzigo uliobaki store kwa kila saizi ya sare.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddInventory(!showAddInventory)}
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-xs font-bold text-white hover:brightness-110 shadow flex items-center gap-1.5 self-start sm:self-auto transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Ongeza Sare Mpya
+            </button>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {inventory.map((item) => (
-              <div key={item._id} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/30 p-4 space-y-3">
-                <h4 className="text-sm font-bold text-[var(--text)] border-b border-[var(--border)] pb-2 flex items-center justify-between">
-                  <span>{item.itemName}</span>
-                  <span className="text-xs font-mono text-[var(--muted)]">{item.itemId}</span>
-                </h4>
-                
-                <table className="w-full text-xs text-left">
-                  <thead>
-                    <tr className="text-[var(--muted)] font-semibold border-b border-[var(--border)]/60">
-                      <th className="pb-1.5">Size</th>
-                      <th className="pb-1.5 text-center">Mwanzo (Initial)</th>
-                      <th className="pb-1.5 text-center">Uliotoka (Sold)</th>
-                      <th className="pb-1.5 text-right">Uliobaki (Remaining)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border)]/40">
-                    {item.stock.map((st) => (
-                      <tr key={st._id} className="hover:bg-[var(--surface-2)]/50">
-                        <td className="py-2 font-bold text-[var(--text)]">{st.size}</td>
-                        <td className="py-2 text-center text-[var(--muted)]">{st.initial}</td>
-                        <td className="py-2 text-center font-semibold text-blue-400">{st.sold}</td>
-                        <td className="py-2 text-right">
-                          <span className={`font-bold ${
-                            st.remaining < 5 ? "text-red-400 animate-pulse font-extrabold" : "text-green-400"
-                          }`}>
-                            {st.remaining}
-                          </span>
-                          {st.remaining < 5 && (
-                            <span className="ml-1 text-[8px] bg-red-500/10 text-red-500 border border-red-500/20 rounded-full px-1.5 py-0.5 font-bold uppercase tracking-widest">
-                              Low
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          {/* Add New Uniform Form */}
+          {showAddInventory && (
+            <form onSubmit={handleCreateInventoryItem} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/40 p-5 space-y-4 max-w-xl">
+              <h4 className="text-sm font-bold text-[var(--text)]">Sajili Aina Mpya ya Sare</h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--muted)]">Jina la Sare</label>
+                  <input
+                    type="text"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    placeholder="School Sweater (Blue)"
+                    className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--muted)]">Code/Kifupisho (e.g. u9)</label>
+                  <input
+                    type="text"
+                    value={newItemId}
+                    onChange={(e) => setNewItemId(e.target.value)}
+                    placeholder="u9"
+                    className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                    required
+                  />
+                </div>
               </div>
-            ))}
+              <div>
+                <label className="block text-xs font-semibold text-[var(--muted)]">Saizi zilizopo (Tenganisha kwa koma)</label>
+                <input
+                  type="text"
+                  value={newItemSizes}
+                  onChange={(e) => setNewItemSizes(e.target.value)}
+                  placeholder="XS, S, M, L, XL"
+                  className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowAddInventory(false)}
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-bold text-[var(--text)] hover:bg-[var(--surface-2)]"
+                >
+                  Ghairi
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-[var(--accent)] px-4 py-2 text-xs font-bold text-white hover:brightness-110 shadow"
+                >
+                  Hifadhi Sare
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {inventory.map((item) => {
+              const isEditing = editingItemId === item._id;
+              return (
+                <div key={item._id} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/30 p-4 space-y-3">
+                  <h4 className="text-sm font-bold text-[var(--text)] border-b border-[var(--border)] pb-2 flex items-center justify-between">
+                    <div>
+                      <span>{item.itemName}</span>
+                      <span className="ml-2 text-[10px] font-mono text-[var(--muted)] bg-[var(--surface-2)] px-2 py-0.5 rounded-full">{item.itemId}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1.5">
+                      {isEditing ? (
+                        <>
+                          <button
+                            onClick={() => handleSaveInventoryStock(item._id)}
+                            className="rounded bg-green-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-green-600 transition"
+                          >
+                            Hifadhi
+                          </button>
+                          <button
+                            onClick={() => setEditingItemId(null)}
+                            className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[10px] font-bold text-[var(--text)] hover:bg-[var(--surface-2)] transition"
+                          >
+                            Ghairi
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => startEditingInventory(item)}
+                            className="rounded border border-[var(--border)] bg-blue-500/10 px-2.5 py-1 text-[10px] font-bold text-blue-500 hover:bg-blue-500 hover:text-white transition flex items-center gap-1"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-2.5 h-2.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.013a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                            </svg>
+                            Ingiza Mzigo
+                          </button>
+                          <button
+                            onClick={() => handleDeleteInventoryItem(item._id)}
+                            className="rounded border border-[var(--border)] bg-red-500/10 px-2.5 py-1 text-[10px] font-bold text-red-500 hover:bg-red-500 hover:text-white transition"
+                          >
+                            Futa
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </h4>
+                  
+                  <table className="w-full text-xs text-left">
+                    <thead>
+                      <tr className="text-[var(--muted)] font-semibold border-b border-[var(--border)]/60">
+                        <th className="pb-1.5">Size</th>
+                        <th className="pb-1.5 text-center">Mwanzo (Initial)</th>
+                        <th className="pb-1.5 text-center">Uliotoka (Sold)</th>
+                        <th className="pb-1.5 text-right">Uliobaki (Remaining)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border)]/40">
+                      {item.stock.map((st) => {
+                        const remainingPct = st.initial > 0 ? (st.remaining / st.initial) * 100 : 0;
+                        return (
+                          <tr key={st._id} className="hover:bg-[var(--surface-2)]/50">
+                            <td className="py-2.5 font-bold text-[var(--text)]">{st.size}</td>
+                            <td className="py-2.5 text-center">
+                              {isEditing ? (
+                                <input
+                                  type="number"
+                                  value={editStockValues[st.size] !== undefined ? editStockValues[st.size] : st.initial}
+                                  onChange={(e) => setEditStockValues({
+                                    ...editStockValues,
+                                    [st.size]: Number(e.target.value)
+                                  })}
+                                  className="w-16 rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-center text-xs text-[var(--text)] outline-none focus:border-[var(--accent)]"
+                                  min={0}
+                                />
+                              ) : (
+                                <span className="text-[var(--muted)] font-medium">{st.initial}</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 text-center font-semibold text-blue-400">{st.sold}</td>
+                            <td className="py-2.5 text-right">
+                              <div className="flex flex-col items-end">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`font-bold ${
+                                    st.remaining < 5 ? "text-red-400 animate-pulse font-extrabold" : "text-green-400"
+                                  }`}>
+                                    {st.remaining}
+                                  </span>
+                                  {st.remaining < 5 && (
+                                    <span className="text-[8px] bg-red-500/10 text-red-500 border border-red-500/20 rounded-full px-1.5 py-0.5 font-bold uppercase tracking-widest">
+                                      Low
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {/* Progress Bar showing visual remaining status */}
+                                <div className="h-1 w-16 bg-black/30 rounded-full overflow-hidden mt-1 shadow-inner">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      remainingPct <= 20 || st.remaining < 5
+                                        ? "bg-red-500 animate-pulse"
+                                        : remainingPct <= 50
+                                          ? "bg-amber-500"
+                                          : "bg-emerald-500"
+                                    }`}
+                                    style={{ width: `${Math.min(100, Math.max(0, remainingPct))}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
